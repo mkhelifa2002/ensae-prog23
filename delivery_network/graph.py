@@ -13,13 +13,14 @@ class Graph:
     nb_nodes: int
         The number of nodes.
     nb_edges: int
-        The number of edges. 
+        The number of edges.
     """
+
 
     def __init__(self, nodes=[]):
         """
         Initializes the graph with a set of nodes, and no edges. 
-        Parameters: 
+        Parameters:
         -----------
         nodes: list, optional
             A list of nodes. Default is empty.
@@ -39,11 +40,11 @@ class Graph:
             for source, destination in self.graph.items():
                 output += f"{source}-->{destination}\n"
         return output
-    
+
+
     def add_edge(self, node1, node2, power_min, dist=1):
         """
         Adds an edge to the graph. Graphs are not oriented, hence an edge is added to the adjacency list of both end nodes. 
-
         Parameters: 
         -----------
         node1: NodeType
@@ -67,14 +68,39 @@ class Graph:
         self.graph[node1].append((node2, power_min, dist))
         self.graph[node2].append((node1, power_min, dist))
         self.nb_edges += 1
-    
+
 
     def get_path_with_power(self, src, dest, power):
-        raise NotImplementedError
-    
+        p=0
+        q=0
+        path=[src]
+        visited=[]
+        T=[]
+        U=self.connected_components()
+        for i in range(len(U)):
+            if src in U[i]:
+                p=i
+            if dest in U[i]:
+                q=i
+        if p!=q:
+            return None
+        Trajet(self,visited,path,power,src,dest,T)
+        if len(T)==0:
+            return None
+        return T[0]
 
-    def connected_components(self):
-        raise NotImplementedError
+
+    def connected_components(self): #O(m+n)
+        Components=[[]]
+        Visited=[]
+        while len(Visited)!=len(self.nodes):
+            for i in self.nodes:
+                if not i in Visited:
+                    parcours(self,i,Components[-1])
+                    for x in Components[-1]:
+                        Visited.append(x)
+                    Components.append([])
+        return Components[:-1]
 
 
     def connected_components_set(self):
@@ -83,29 +109,53 @@ class Graph:
         For instance, for network01.in: {frozenset({1, 2, 3}), frozenset({4, 5, 6, 7})}
         """
         return set(map(frozenset, self.connected_components()))
-    
+
+
     def min_power(self, src, dest):
         """
         Should return path, min_power. 
         """
-        raise NotImplementedError
+        a=0
+        b=0
+        c=0
+        m=0
+        t=[]
+        for i in self.graph:
+            for j in self.graph[i]:
+                t.append(j[1])
+        b=sum(t)
+        m=min(t)
+        while b-a>=m:
+            c=(a+b)/2
+            if self.get_path_with_power(src,dest,c)!=None:
+                b=c
+            else:
+                a=c
+        v=0
+        U=self.get_path_with_power(src,dest,b)
+        if U==None:
+            return None
+        for i in range(len(U)-1):
+            for j in self.graph[U[i]]:
+                if j[0]==U[i+1]:
+                    v+=j[1]
+        return v
+
+
 
 
 def graph_from_file(filename):
     """
     Reads a text file and returns the graph as an object of the Graph class.
-
     The file should have the following format: 
         The first line of the file is 'n m'
         The next m lines have 'node1 node2 power_min dist' or 'node1 node2 power_min' (if dist is missing, it will be set to 1 by default)
         The nodes (node1, node2) should be named 1..n
         All values are integers.
-
     Parameters: 
     -----------
     filename: str
         The name of the file
-
     Outputs: 
     -----------
     g: Graph
