@@ -139,7 +139,7 @@ class Graph:
             for j in self.graph[U[i]]:
                 if j[0]==U[i+1]:
                     v+=j[1]
-        return v
+        return [U,v]
 
 
 
