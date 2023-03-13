@@ -45,16 +45,11 @@ def Trajet(g,visited,path,P,SRC,DEST,T):
         visited.pop()
 
 
-def Union(a,b,P,R):
+def Union(a,b,P):
     A=Find(P,a)
     B=Find(P,b)
-    if R[A-1]<R[B-1]:
+    if A!=B:
         P[A-1]=B
-    elif R[A-1]>R[B-1]:
-        P[B-1]=A
-    else:
-        P[B-1]=A
-        R[A-1]+=1
 
 def Find(P,i):
     if P[i-1]==i:
@@ -64,7 +59,6 @@ def Find(P,i):
 def kruskal(g):
     T=[]
     P=[i for i in range(1,len(g.graph)+1)]
-    R=[0 for i in range(len(g.graph))]
     Q=[]
     for i in range(1,len(g.graph)+1):
         for j in range(len(g.graph[i])):
@@ -78,9 +72,13 @@ def kruskal(g):
         if p != q:
             c2 = c2 + 1
             Q.append(T[c1])
-            Union(p,q,P,R)
-    for u, v, weight in Q:
-        print("%d - %d: %d" % (u, v, weight))
+            Union(p,q,P)
+    G=Graph([i for i in range(1,len(Q)+1)])
+    for i in range(len(Q)):
+        G.add_edge(Q[i][0],Q[i][1],Q[i][2])
+    return G
 
-g = graph_from_file(data_path + file_name)
-print(g)
+def power_min_2(g,src,dest):
+    G=kruskal(g)
+    h=G.min_power(src,dest)
+    return h
